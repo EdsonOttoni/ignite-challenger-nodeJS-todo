@@ -4,7 +4,7 @@ function checksCreateTodosUserAvailability(users){
 
     if(user.tier === 'free' && user.todos.length >= 10){
       return response.status(400).json({
-        message: 'You can not create more than 10 todos'
+        error: 'You can not create more than 10 todos'
       })
     }
 

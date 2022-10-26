@@ -15,7 +15,6 @@ app.use(express.json());
 
 const users = [];
 
-
 app.post('/users',(request, response) => {
   const {name, username, tier} = request.body
 
@@ -24,7 +23,7 @@ app.post('/users',(request, response) => {
   if(user){
     return response.status(400).json(
       {
-        message: 'User already exists'
+        error: 'User already exists'
       })
   }
 
@@ -41,20 +40,35 @@ app.post('/users',(request, response) => {
   return response.status(201).json(newUser);
 })
 
-app.get('/users/:id', findUserById ,(request, response) => {
-  const id = request.params.id
-
-  const user = users.find(user => user.id === id)
+app.get('/users/:id', findUserById(users) ,(request, response) => {
+  const {user} = request
 
   return response.status(201).json(user)
 })
 
 app.use(checksExistsUserAccount(users))
 
+app.patch('/user/:id/tier', findUserById(users), (request, response) => {
+  const {user} = request
+  const {tier} = request.body
+
+  if(user.tier === tier) {
+    return response.status(400).json(
+      {
+        error: 'You already had this plan'
+      })
+  }
+
+  user.tier = tier
+
+  return response.status(201).send()
+  
+})
+
 app.get('/todos', (request, response) => {
   const {user} = request
 
-  return response.status(201).json(user.todos)
+  return response.json(user.todos)
 });
 
 app.post('/todos', checksCreateTodosUserAvailability(users),(request, response) => {
@@ -75,10 +89,8 @@ app.post('/todos', checksCreateTodosUserAvailability(users),(request, response) 
 });
 
 app.put('/todos/:id', checksTodoExists,(request, response) => {
-  const {user} = request
+  const {todo} = request
   const {title, deadline} = request.body
-
-  const todo = user.todos.find(todo => todo.id === request.params.id)
 
   todo.title = title
   todo.deadline = new Date(deadline)
@@ -87,20 +99,17 @@ app.put('/todos/:id', checksTodoExists,(request, response) => {
 });
 
 app.patch('/todos/:id/done', checksTodoExists,(request, response) => {
-  const {user} = request
-  const {done} = request.body
+  const {todo} = request
 
-  const todo = user.todos.find(todo => todo.id === request.params.id)
-
-  todo.done = done
+  todo.done = true
 
   return response.status(201).send()
 });
 
 app.delete('/todos/:id', checksTodoExists,(request, response) => {
-  const {user} = request
+  const {user, todo} = request
 
-  user.todos.splice(todo,1)
+  user.todos.splice(todo, 1)
 
   return response.status(204).send()
 });

@@ -8,7 +8,7 @@ function checksExistsUserAccount(users){
     if(!user){
       response.status(404).json(
         {
-          message: 'You do not have access'
+          error: 'You do not have access'
         })
     }
 

@@ -11,6 +11,8 @@ function findUserById(users) {
         })
     }
 
+    request.user = user
+
     return next()
   }
 }
